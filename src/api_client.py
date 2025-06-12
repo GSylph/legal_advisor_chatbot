@@ -27,11 +27,10 @@ if not model:
 # Print a success message
 print("Gemini model loaded successfully.")
 
-try:
-    response = model.generate_content(contents="Explain how AI works in simple terms.")
-    print(response.text)
-except Exception as e:
-    print(f"Error generating content: {str(e)}")
-
-
-
+def send_prompt(prompt):
+    """Send a prompt to the Gemini model and return the response."""
+    try:
+        response = model.generate_content(contents=prompt, stream=True)
+        return response
+    except Exception as e:
+        raise RuntimeError(f"Error generating content: {str(e)}")
