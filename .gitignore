@@ -1,0 +1,28 @@
+# Environment
+.env
+__pycache__/
+*.py[cod]
+*.swp
+
+# Logs & Sessions
+storage/logs/
+storage/sessions/
+
+# Editor/OS Junk
+.DS_Store
+*.vscode
+*.idea
+*.log
+
+# Virtual Environments
+venv/
+.env/
+.venv/
+
+# Compiled files
+*.so
+*.out
+
+# Python Test Reports
+htmlcov/
+coverage.xml

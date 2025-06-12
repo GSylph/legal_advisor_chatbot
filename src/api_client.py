@@ -1,0 +1,37 @@
+#Wrapper that loads Gemini API client 
+from dotenv import load_dotenv
+import os
+import  google.generativeai as  genai
+
+
+# Load environment variables from .env file
+load_dotenv()
+
+
+# Get the API key from environment variables
+API_KEY = os.getenv("GEMINI_API_KEY")
+if not API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is not set.")
+
+# Initialize the Gemini API client
+genai.configure(api_key=API_KEY)
+
+
+# Print a success message
+print("Gemini API client initialized successfully.")
+
+model=genai.GenerativeModel("gemini-2.0-flash")
+# Check if the model is loaded correctly
+if not model:
+    raise RuntimeError("Failed to load the Gemini model.")
+# Print a success message
+print("Gemini model loaded successfully.")
+
+try:
+    response = model.generate_content(contents="Explain how AI works in simple terms.")
+    print(response.text)
+except Exception as e:
+    print(f"Error generating content: {str(e)}")
+
+
+
