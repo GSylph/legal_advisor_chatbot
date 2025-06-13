@@ -1,15 +1,23 @@
 import spacy
+from spacy.matcher import PhraseMatcher
 
 # Load the English NLP model
 nlp = spacy.load("en_core_web_sm")
+
+FAMILY_ROLES=["uncle","aunt","cousin","brother","sister","mother","father","grandfather","grandmother","nephew","niece","dad","mom","son","daughter"]
+
+matcher=PhraseMatcher(nlp.vocab,attr="LOWER")
+pattern=[nlp.make_doc(term) for term in FAMILY_ROLES]
+matcher.add("FAMILY_ROLES", pattern)
 
 def extract_entities(user_input):
     doc = nlp(user_input)
 
     entities = {
         "locations": [],
-        "people": [],
         "dates": [],
+        "people": [],
+        "family_roles": []
     }
 
     for ent in doc.ents:
@@ -19,6 +27,11 @@ def extract_entities(user_input):
             entities["people"].append(ent.text)
         elif ent.label_ in ["DATE"]:
             entities["dates"].append(ent.text)
+        
+    matches = matcher(doc)
+    for match_id, start, end in matches:
+        span = doc[start:end]
+        entities["family_roles"].append(span.text)
 
     return entities
 
