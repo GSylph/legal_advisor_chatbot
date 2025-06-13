@@ -26,3 +26,8 @@ This chatbot does not replace legal counsel, but aims to provide:
 - "What documents do I need to prove land ownership?"
 - "There is a boundary dispute with my neighbor — what can I do?"
 - "Is oral agreement valid in tenancy?"
+
+
+# Remember
+
+- Spacy nlp installation : python -m spacy download en_core_web_sm
