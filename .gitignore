@@ -26,3 +26,5 @@ venv/
 # Python Test Reports
 htmlcov/
 coverage.xml
+
+PLAN.md

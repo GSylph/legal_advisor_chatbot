@@ -30,7 +30,13 @@ print("Gemini model loaded successfully.")
 def send_prompt(prompt):
     """Send a prompt to the Gemini model and return the response."""
     try:
-        response = model.generate_content(contents=prompt, stream=True)
+        response = model.generate_content(contents=prompt, stream=False)
         return response
     except Exception as e:
         raise RuntimeError(f"Error generating content: {str(e)}")
+    
+def extract_text_from_response(response):
+    try:
+        return response.candidates[0].content.parts[0].text
+    except Exception as e:
+        raise ValueError(f"Failed to extract text from Gemini response: {e}")
