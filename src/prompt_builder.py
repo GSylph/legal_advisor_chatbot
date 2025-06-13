@@ -10,7 +10,7 @@ def build_prompt(user_input, intent=None, entities=None):
         user_input=user_input,
         intent=intent or "uncategorized",
         location=", ".join(entities.get("locations", [])) if entities.get("locations") else None,
-        people=", ".join(entities.get("people", []) + entities.get("family_roles", [])) if entities else None,
+        people=entities.get("people", "") if entities else "",
         date=", ".join(entities.get("dates", [])) if entities.get("dates") else None,
         country="Singapore"
 

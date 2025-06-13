@@ -35,9 +35,9 @@ def extract_entities(user_input):
     # Merge family_roles into people 
     combined_people = list(set(people + family_roles))
     return {
-        "location": ", ".join(locations) if locations else None,
-        "people": ", ".join(combined_people) if combined_people else None,
-        "date": ", ".join(dates) if dates else None
+        "location": ", ".join(locations) if locations else "",
+        "people": ", ".join(combined_people) if combined_people else "",
+        "date": ", ".join(dates) if dates else ""
     }
 
 # if __name__ == "__main__":
