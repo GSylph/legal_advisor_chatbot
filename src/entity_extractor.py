@@ -17,7 +17,6 @@ def extract_entities(user_input):
     dates= []
     people= []
     family_roles= []
-    
 
     for ent in doc.ents:
         if ent.label_ in ["GPE", "LOC"]:
