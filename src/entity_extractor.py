@@ -13,31 +13,37 @@ matcher.add("FAMILY_ROLES", pattern)
 def extract_entities(user_input):
     doc = nlp(user_input)
 
-    entities = {
-        "locations": [],
-        "dates": [],
-        "people": [],
-        "family_roles": []
-    }
+    locations= []
+    dates= []
+    people= []
+    family_roles= []
+    
 
     for ent in doc.ents:
-        if ent.label_ in ["GPE", "LOC"]:  # Geo-political entity / location
-            entities["locations"].append(ent.text)
+        if ent.label_ in ["GPE", "LOC"]:
+            locations.append(ent.text)
         elif ent.label_ == "PERSON":
-            entities["people"].append(ent.text)
-        elif ent.label_ in ["DATE"]:
-            entities["dates"].append(ent.text)
+            people.append(ent.text)
+        elif ent.label_ == "DATE":
+            dates.append(ent.text)
+
         
     matches = matcher(doc)
     for match_id, start, end in matches:
         span = doc[start:end]
-        entities["family_roles"].append(span.text)
+        family_roles.append(span.text)
 
-    return entities
+    # Merge family_roles into people 
+    combined_people = list(set(people + family_roles))
+    return {
+        "location": ", ".join(locations) if locations else None,
+        "people": ", ".join(combined_people) if combined_people else None,
+        "date": ", ".join(dates) if dates else None
+    }
 
-if __name__ == "__main__":
-    test_input = "My uncle encroached on our farm in Pune in 2015 after my father passed away."
-    doc = nlp(test_input)
-    print([(token.text, token.label_) for token in doc.ents ])
-    print(extract_entities(test_input))
+# if __name__ == "__main__":
+#     test_input = "My uncle encroached on our farm in Pune in 2015 after my father passed away."
+#     doc = nlp(test_input)
+#     print([(token.text, token.label_) for token in doc.ents ])
+#     print(extract_entities(test_input))
 

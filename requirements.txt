@@ -2,3 +2,4 @@ python-dotenv
 google-generativeai
 google-genai
 spacy
+Jinja2
