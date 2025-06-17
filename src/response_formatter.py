@@ -6,6 +6,7 @@ class ResponseFormatter:
         self.sections = {}
         self.section_keywords = {
             'summary': ['summary', 'overview', 'background', 'introduction', 'about'],
+            'context': ['context', 'legal framework', 'relevant laws', 'regulations', 'statutes', 'provisions', 'legal basis'],
             'steps': ['steps', 'step', 'action', 'procedure', 'process', 'do'],
             'warnings': ['warning', 'caution', 'alert', 'beware', 'avoid', 'danger'],
             'contacts': ['contact', 'authority', 'organization', 'agency', 'bureau', 'office'],
@@ -18,6 +19,7 @@ class ResponseFormatter:
         """
         self.sections = {
             'summary': '',
+            'context': '',
             'steps': [],
             'warnings': [],
             'contacts': [],
@@ -130,7 +132,7 @@ class ResponseFormatter:
         """
         Process content based on section type
         """
-        if section_type in ['disclaimer', 'summary']:
+        if section_type in ['disclaimer', 'summary', 'context']:
             self.sections[section_type] = self._clean_text_content(content)
         else:
             items = self._extract_list_items(content)
@@ -252,6 +254,14 @@ class ResponseFormatter:
             output += "📋 **Summary:**\n"
             output += f"{parsed_data['summary']}\n\n"
         
+        # Format context section (new addition)
+        if parsed_data.get('context'):
+            output += "📚 **Legal Context & Framework:**\n"
+            output += f"{parsed_data['context']}\n\n"
+        else:
+            output += "📚 **Legal Context & Framework:**\n"
+            output += "No specific legal context or framework information was provided in the response.\n\n"
+        
         # Format steps
         if parsed_data.get('steps'):
             output += "📝 **Steps to Take:**\n"
@@ -316,26 +326,30 @@ def format_gemini_response(response_text: str) -> str:
 
 # Example usage and testing
 if __name__ == "__main__":
-    # Test with sample response
+    # Test with sample response including context
     sample_response = """
     **1. Summary**
-    This is a summary of the legal issue.
+    This is a summary of the legal issue regarding employment termination.
     
-    **2. Steps to Take**
-    * **Gather Evidence:** Collect all relevant documents and photographs.
-    * **Consult Lawyer:** Seek professional legal advice from a qualified attorney.
-    * **File Complaint:** Submit formal complaint to relevant authorities.
+    **2. Context**
+    This is the context of the legal issue, including relevant laws and regulations retrieved from the knowledge base. According to Section 25-F of the Industrial Disputes Act, 1947, no workman employed in any industry who has been in continuous service for not less than one year under an employer shall be retrenched by that employer until certain conditions are met. The Employee State Insurance Act, 1948 also provides certain protections for workers facing termination.
+
+    **3. Steps to Take**
+    * **Gather Evidence:** Collect all relevant documents and photographs including employment contract, termination letter, and service records.
+    * **Consult Lawyer:** Seek professional legal advice from a qualified labor law attorney.
+    * **File Complaint:** Submit formal complaint to relevant labor authorities or industrial tribunal.
     
-    **3. Warnings**
-    * **Do Not Delay:** Time limitations may apply to your case.
-    * **Avoid Direct Confrontation:** This could escalate the situation.
+    **4. Warnings**
+    * **Do Not Delay:** Time limitations may apply to your case under the Industrial Disputes Act.
+    * **Avoid Direct Confrontation:** This could escalate the situation and harm your legal position.
     
-    **4. Relevant Contacts**
+    **5. Relevant Contacts**
     * **Legal Aid Bureau:** Provides assistance to those who need legal help. Website: https://example.com
-    * **Local Court:** Contact for filing procedures and requirements.
+    * **Labor Commissioner Office:** Contact for filing labor dispute complaints and guidance.
+    * **Industrial Tribunal:** For formal adjudication of industrial disputes.
     
-    **5. Disclaimer**
-    This information is for general guidance only and does not constitute legal advice.
+    **6. Disclaimer**
+    This information is for general guidance only and does not constitute legal advice. Please consult with a qualified attorney for advice specific to your situation.
     """
     
     formatted = format_gemini_response(sample_response)
