@@ -3,6 +3,11 @@ The user may ask about property law, land ownership, legal disputes, or tenant r
 
 ---
 
+### Context:
+{{kb_context}}
+
+---
+
 ### 🧾 User Query:
 {{ user_input }}
 

@@ -27,11 +27,11 @@ class PDFKnowledgeBase:
     
     
     def search(self, query, top_n=5):
-        query=query.lower()
+        query_words=query.lower().split()
         results=[]
         for chunk in self.chunks:
-            
-            score = chunk.lower().count(query)
+            chunk_lower = chunk.lower()
+            score = sum(chunk_lower.count(word) for word in query_words)
             if score > 0:
                 results.append((chunk, score))
 
@@ -42,8 +42,10 @@ if __name__ == "__main__":
     path="data/statutes"
     kb = PDFKnowledgeBase(path)
     kb.load_pdf()
-    results = kb.search("constitution")  # try any keyword you saw in the output
-    for i, (chunk, score) in enumerate(results, 1):
-        
-        print(f"\nResult {i} (Score: {score}):\n{chunk}...\n{'-'*40}")
+    results = kb.search("tenant rights")  # try any keyword you saw in the output
+    if not results:
+        print("❌ No matching chunks found.")
+    else:
+        for i, (chunk, score) in enumerate(results, 1):
+            print(f"\nResult {i} (Score: {score}):\n{chunk}...\n{'-'*40}")
 

@@ -35,14 +35,14 @@ def extract_entities(user_input):
     # Merge family_roles into people 
     combined_people = list(set(people + family_roles))
     return {
-        "location": ", ".join(locations) if locations else "",
-        "people": ", ".join(combined_people) if combined_people else "",
-        "date": ", ".join(dates) if dates else ""
+        "locations": locations,
+        "people": combined_people,
+        "dates": dates
     }
 
-# if __name__ == "__main__":
-#     test_input = "My uncle encroached on our farm in Pune in 2015 after my father passed away."
-#     doc = nlp(test_input)
-#     print([(token.text, token.label_) for token in doc.ents ])
-#     print(extract_entities(test_input))
+if __name__ == "__main__":
+    test_input = "My uncle encroached on our farm in Pune in 2015 after my father passed away."
+    doc = nlp(test_input)
+    print([(token.text, token.label_) for token in doc.ents ])
+    print(extract_entities(test_input))
 

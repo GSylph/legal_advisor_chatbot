@@ -4,10 +4,11 @@ from intent_classifier import classify_intent
 from entity_extractor import extract_entities
 from prompt_builder import build_prompt
 from response_formatter import format_gemini_response
+from kb_retriever import PDFKnowledgeBase
 
 def main():
+    kb= PDFKnowledgeBase(path="data/statutes")
     print("📜 Legal Advisor Chatbot (type 'exit' to quit)\n")
-
     while True:
         user_input = input("Enter your prompt: ").strip()
         if user_input.lower() in ["exit", "quit"]:
@@ -15,11 +16,14 @@ def main():
             break
 
         try:
+
             intent = classify_intent(user_input)
 
             entities = extract_entities(user_input)
 
             prompt = build_prompt(user_input, intent, entities)
+
+            context_chunks = kb.search(user_input)
 
             response = send_prompt(prompt)
             response_text = extract_text_from_response(response)
