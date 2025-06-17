@@ -8,6 +8,7 @@ from kb_retriever import PDFKnowledgeBase
 
 def main():
     kb= PDFKnowledgeBase(path="data/statutes")
+    kb.load_pdf()
     print("📜 Legal Advisor Chatbot (type 'exit' to quit)\n")
     while True:
         user_input = input("Enter your prompt: ").strip()
@@ -21,9 +22,10 @@ def main():
 
             entities = extract_entities(user_input)
 
-            prompt = build_prompt(user_input, intent, entities)
-
             context_chunks = kb.search(user_input)
+
+            prompt = build_prompt(user_input,context_chunks, intent, entities)
+            print("\n🧾 FINAL PROMPT TO LLM:\n", prompt)
 
             response = send_prompt(prompt)
             response_text = extract_text_from_response(response)

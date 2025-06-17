@@ -26,7 +26,7 @@ class PDFKnowledgeBase:
         return [chunk.strip() for chunk in text.split('\n\n') if chunk.strip()]
     
     
-    def search(self, query, top_n=5):
+    def search(self, query, top_n=3):
         query_words=query.lower().split()
         results=[]
         for chunk in self.chunks:

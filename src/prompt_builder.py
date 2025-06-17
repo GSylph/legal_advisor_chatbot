@@ -7,7 +7,7 @@ def build_prompt(user_input, kb_chunks, intent=None, entities=None):
         template_str = file.read()
     template=Template(template_str)
 
-    context="\n\n".join(chunk['text'] for chunk in kb_chunks)
+    context = "\n\n".join(chunk for chunk, _ in kb_chunks)
 
     filled_prompt = template.render(
         user_input=user_input,

@@ -19,7 +19,7 @@ The user may ask about property law, land ownership, legal disputes, or tenant r
 ---
 
 ### 📌 Relevant Details:
-- **Location:** {{ location if location else "Not specified" }}
+- **Location:** {{ location if location else "Singapore" }}
 - **People Involved:** {{ people if people else "Not specified" }}
 - **Date/Time:** {{ date if date else "Not provided" }}
 
