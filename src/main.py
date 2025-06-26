@@ -5,6 +5,7 @@ from entity_extractor import extract_entities
 from prompt_builder import build_prompt
 from response_formatter import format_gemini_response
 from kb_retriever import PDFKnowledgeBase
+from logger import log_fallback_response, log_error
 
 def main():
     kb= PDFKnowledgeBase(path="data/statutes")
@@ -34,7 +35,9 @@ def main():
             response = send_prompt(prompt)
             response_text = extract_text_from_response(response)
             formatted_response = format_gemini_response(response_text)
-            
+            if "⚠️ Gemini could not produce a structured response" in formatted_response:
+                log_fallback_response(response_text)
+
             conversation_history.append({
                 "user": user_input,
                 "bot": formatted_response  # Or whatever variable stores formatted output
@@ -53,6 +56,7 @@ def main():
             # print("\n\n-------------------------------------------------------\n")
 
         except Exception as e:
+            log_error(str(e))
             print(f"⚠️ Error: {e}")
             print("Please try again or check logs.")
 

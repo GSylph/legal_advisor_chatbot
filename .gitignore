@@ -31,3 +31,5 @@ PLAN.md
 DIARY.md
 UPGRADES.md
 data/
+/storage/logs/*
+!storage/logs/.gitkeep

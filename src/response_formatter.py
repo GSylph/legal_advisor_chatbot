@@ -1,5 +1,14 @@
 import re
 from typing import Dict, List, Optional, Tuple
+import logging
+from logger import log_fallback_response 
+
+
+logging.basicConfig(
+    filename="chatbot.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 class ResponseFormatter:
     def __init__(self):
@@ -322,6 +331,22 @@ def format_gemini_response(response_text: str) -> str:
     """
     formatter = ResponseFormatter()
     parsed_data = formatter.parse_response(response_text)
+
+    if (
+    not parsed_data.get("summary")
+    and not parsed_data.get("context")
+    and not parsed_data.get("steps")
+    and not parsed_data.get("warnings")
+    and not parsed_data.get("contacts")
+    and not parsed_data.get("disclaimer")
+    ):
+        logging.warning(f"⚠️ Unstructured Gemini response:\n{response_text.strip()}")
+        log_fallback_response(response_text)
+        return (
+            "⚠️ Gemini could not produce a structured response.\n\n"
+            f"📝 Here's the raw output returned:\n\n{response_text.strip()}"
+        )
+
     return formatter.format_output(parsed_data)
 
 # Example usage and testing
