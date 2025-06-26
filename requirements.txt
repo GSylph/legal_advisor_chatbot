@@ -5,3 +5,4 @@ spacy
 Jinja2
 pymupdf
 nltk
+colorama

@@ -1,188 +1,191 @@
-# 🧑‍⚖️ Legal Advisor Chatbot (Singapore Law Focus)
+# 📘 Legal Advisor Chatbot (Singapore Law) - README
 
-The **Legal Advisor Chatbot** is an AI-powered assistant that helps users understand what to do during **land/property-related legal disputes**, such as:
-
-1. 🏠 Property Law Issues
-2. 🧾 Land Ownership Conflicts
-3. ⚖️ Property or Inheritance Disputes
-4. 🏨 Tenant & Landlord Rights
-
-The chatbot uses Google Gemini to provide early-stage legal guidance based on the legal structure of **Singapore** — a country selected for its simpler and more predictable property law system.
-
-> ⚠️ This chatbot does **not** replace a human lawyer. It gives **educational, general-purpose legal steps** — not personalized legal advice.
+An intelligent legal assistant CLI chatbot powered by Google Gemini API that helps users understand Singaporean legal topics. It classifies intent, extracts entities, retrieves statutory context, and provides structured, human-readable legal answers.
 
 ---
 
-## 🔑 Features
+## 🚀 MVP Features
 
-* 📌 Suggests actionable next steps in common legal situations
-* ⚠️ Provides legal risks/warnings users should be aware of
-* 🧠 Understands who’s involved, where, and when (NER)
-* ✨ Powered by Gemini via Google Generative AI
+### ✅ Core Capabilities
+
+* **Natural Language Legal Q\&A**
+* **Intent Classification** (e.g., legal question, follow-up, definition)
+* **Entity Extraction** (locations, names, dates)
+* **Prompt Building via Jinja2 Templates**
+* **PDF Knowledge Base Retrieval** (RAG-ready)
+* **Structured Output Formatting** (Summary, Context, Steps, etc.)
+* **Memory Injection for Last N Conversations**
+* **CLI Interface** for local testing
+* **Logging of Fallbacks and Errors**
 
 ---
 
-## 💬 Sample Use Cases
-
-* “My uncle encroached on our land after my father passed away.”
-* “I have a dispute with my neighbor over a 5-foot pathway in London.”
-* “What rights do tenants have in Singapore without written contracts?”
-
----
-
-## ✅ Current Progress (What’s Working)
-
-### ✅ 1. Project Folder Setup
+## 🗂️ Project Structure
 
 ```
-legal-advisor-chatbot/
-├── run.py                 # Entry script
-├── requirements.txt
-├── .env                  # Stores Gemini API key
-├── .gitignore            # Ignores .env, pycache, etc.
-├── prompts/
-│   └── base_prompt.md    # Jinja2 prompt template
+legal_advisor_chatbot/
 ├── src/
-│   ├── main.py           # Chat loop (CLI)
-│   ├── api_client.py     # Gemini API wrapper
-│   ├── intent_classifier.py # Rule-based intent recognition
-│   ├── entity_extractor.py  # Extracts people, date, location
-│   └── prompt_builder.py    # Renders prompt using template
+│   ├── main.py                # CLI chatbot entrypoint
+│   ├── api_client.py          # Gemini API integration
+│   ├── intent_classifier.py   # Classifies user intent
+│   ├── entity_extractor.py    # Extracts dates, people, locations
+│   ├── prompt_builder.py      # Builds prompt from template + context
+│   ├── response_formatter.py  # Formats Gemini output
+│   ├── kb_retriever.py        # PDF loader + keyword search
+│   ├── logger.py              # Logs fallback and error cases
+│   └── tests/                 # Contains test_fallback.py, test_formatter.py etc.
+├── prompts/
+│   └── base_prompt.md         # Jinja2 prompt template
 ├── data/
-│   └── statutes/         # (planned) Law PDFs
+│   └── statutes/              # Legal PDFs for KB (optional)
 ├── storage/
-│   ├── logs/             # (planned) Log errors/responses
-│   └── sessions/         # (planned) Store chat history
+│   └── logs/                  # Logs for fallback + errors
+├── .env                       # API keys, config vars
+├── requirements.txt
+├── README.md                  # You're here!
+├── execution_plan.md          # Roadmap, TODOs, notes
+└── API_REFERENCE.md           # Function-by-function developer docs
 ```
 
 ---
 
-### ✅ 2. Gemini Integration
+## 🧠 How It Works
 
-* `api_client.py` sends prompts to Gemini (`gemini-pro`, `gemini-1.5-flash`) using `google.generativeai`
-* Response is streamed and printed
-
----
-
-### ✅ 3. Interactive Chat CLI
-
-* `main.py` handles chat loop
-* Calls intent classifier → entity extractor → prompt builder → Gemini response
-* Gracefully handles `exit` or `quit`
+1. **User Enters Prompt** →
+2. **Intent + Entity Detection** →
+3. **PDF Knowledge Base Search** →
+4. **Prompt Template Filled** (context + history) →
+5. **Sent to Gemini API** →
+6. **Response Parsed into Structure** →
+7. **Result Displayed in CLI**
 
 ---
 
-### ✅ 4. Intent Classification
+## 🧪 Testing (MVP Level)
 
-* Rule-based keywords return one of:
-
-  * `property_dispute`
-  * `tenant_rights`
-  * `will_and_inheritance`
-  * `court_case`
-  * `fraud_or_cheating`
-  * `uncategorized`
+* `test_fallback.py`: Tests for edge cases in unstructured output
+* `test_formatter.py`: Verifies structured formatting of Gemini output
+* `test_prompt_builder.py`: Ensures prompt rendering with history and context
 
 ---
 
-### ✅ 5. Entity Extraction
+## 🧾 Prompt Template (`prompts/base_prompt.md`)
 
-* Uses `spaCy` and PhraseMatcher
-* Extracts:
+Contains instructions to the Gemini LLM:
 
-  * `location`: from user input (e.g. "Singapore", "Pune")
-  * `people`: e.g. "uncle", "father"
-  * `date`: e.g. "in 2015", "after my father passed away"
-
----
-
-### ✅ 6. Prompt Building
-
-* Jinja2 template in `base_prompt.md`:
-
-```
-You are a legal advisor chatbot for {{ country or "Singapore" }}.
-...
-{{ intent }}
-{{ people }}
-{{ location }}
-{{ date }}
-...
-```
-
-* Dynamically rendered using data from NER and intent classifier
-* Ensures grounded, structured prompt with disclaimer
+* Always structure answer in sections: Summary, Context, Steps, Warnings, Contacts, Disclaimer
+* Inject entities (people, locations, dates)
+* Inject up to 3 turns of chat history
+* Act like a legal assistant for Singapore
 
 ---
 
-## 🚧 Next Steps (Roadmap)
-
-### ⏭️ 1. `response_formatter.py`
-
-* Structure Gemini replies into sections:
-
-  * 🧾 Summary of dispute
-  * ✅ Steps to follow
-  * ⚠️ Warnings or legal risks
-  * 📞 Whom to contact (e.g., police, local authority)
-  * 📚 Referenced laws/sections if applicable
-
-### ⏭️ 2. `kb_retriever.py` (optional)
-
-* Load PDFs or text from `data/statutes/`
-* Match intent/query to relevant excerpts
-* Option: Use embedding-based semantic search later
-
-### ⏭️ 3. Logging & Sessions
-
-* Save conversation data:
-
-  * Input, intent, entities, response, timestamps
-* JSON or SQLite (optional) in `storage/sessions/`
-* Error logs go to `storage/logs/`
-
-### ⏭️ 4. UI (Optional Future)
-
-* Upgrade from CLI to web (Flask/Streamlit/Gradio)
-* Let users pick jurisdiction (Singapore, India, etc.)
-
----
-
-## 🧪 How to Run Locally
+## 📋 Example Interaction
 
 ```bash
-git clone https://github.com/yourname/legal-advisor-chatbot
-cd legal-advisor-chatbot
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
+$ python src/main.py
+📜 Legal Advisor Chatbot (type 'exit' to quit)
 
-Create a `.env` file with:
+Enter your prompt: My cousin took my father’s property after he died.
 
-```
-GEMINI_API_KEY=your-google-api-key
-```
-
----
-
-## ⚙️ Dependencies (requirements.txt)
-
-```
-google-generativeai
-python-dotenv
-spacy
-jinja2
-```
-
-Also run:
-
-```bash
-python -m spacy download en_core_web_sm
+🧠 Gemini says:
+📋 Summary: Your issue involves inheritance law...
+📚 Legal Context: According to Section 5 of...
+📝 Steps to Take:
+ • Gather documents
+ • Contact a civil lawyer
+⚠️ Warnings: Time limits apply for claims.
+📞 Contacts: Legal Aid Bureau
+⚖️ Disclaimer: This is general guidance only...
 ```
 
 ---
 
-## 📜 Legal Disclaimer
+## ⚒️ Logging System
 
-This chatbot provides **general educational legal guidance** only. It is **not a substitute for a licensed lawyer**, and no part of the conversation constitutes a legal verdict. Always consult certified legal professionals for real cases.
+* `fallback_responses.log`: When response was not parseable into structure
+* `errors.log`: Unhandled exceptions or runtime issues
+
+---
+
+## 💬 Intent Handling
+
+Currently hardcoded logic for basic intents:
+
+```python
+if intent == "follow_up":
+    handle_follow_up()
+elif intent == "legal_question":
+    format_structured_response()
+```
+
+✅ Works well for MVP, but post-MVP should adopt intent-handler mapping or schema-driven logic.
+
+---
+
+## 📈 Future Work
+
+| Area              | Upgrade                                  |
+| ----------------- | ---------------------------------------- |
+| Intent System     | Replace rules with fine-tuned classifier |
+| Entity Extraction | Legal-BERT or Gemini API NER             |
+| KB Search         | RAG with vector store (FAISS, Chroma)    |
+| Prompting         | Template per intent or schema-driven     |
+| Output            | Support JSON + Markdown responses        |
+| Memory            | Add vector memory / persistent memory    |
+| UI                | Streamlit or Flask frontend              |
+| Deployment        | Dockerize + `docker-compose.yml`         |
+
+---
+
+## 🐳 Docker Usage (To be done)
+
+**Dockerfile**:
+
+```Dockerfile
+FROM python:3.10
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD ["python", "src/main.py"]
+```
+
+**docker-compose.yml**:
+
+```yaml
+version: '3.8'
+services:
+  chatbot:
+    build: .
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    ports:
+      - "7860:7860"
+```
+
+---
+
+## 📚 License & Credits
+
+This MVP is educational and experimental. Not intended for commercial use. Built using:
+
+* Python
+* Google Gemini API
+* spaCy (NER)
+* Jinja2 (prompt templating)
+* Rich / argparse (optional future CLI upgrades)
+
+---
+
+## 🏁 Final Words
+
+🎉 MVP is complete and fully functional via CLI.
+You can:
+
+* Ask legal questions
+* Get answers backed by relevant law
+* Log and debug fallbacks
+* View structured responses
+
+---

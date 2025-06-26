@@ -10,13 +10,14 @@ from logger import log_fallback_response, log_error
 def main():
     kb= PDFKnowledgeBase(path="data/statutes")
     kb.load_pdf()
-    print("📜 Legal Advisor Chatbot (type 'exit' to quit)\n")
+    print("\n📘 Welcome to the Singapore Legal Advisor Chatbot!")
+    print("Type your legal question below. Type 'exit' or 'quit' to end the session.\n")
     
     conversation_history = []
     max_history = 3
 
     while True:
-        user_input = input("Enter your prompt: ").strip()
+        user_input = input("🧑 You: ").strip()
         if user_input.lower() in ["exit", "quit"]:
             print("👋 Exiting. Stay legally safe!")
             break
@@ -45,7 +46,7 @@ def main():
             if len(conversation_history) > max_history:
                 conversation_history.pop(0)
 
-            print("\n" + "="*55 + "\n")
+            print("\n🤖 Gemini Legal Advisor:\n")
             print(formatted_response)
             print("\n" + "="*55 + "\n")
             # for chunk in response:

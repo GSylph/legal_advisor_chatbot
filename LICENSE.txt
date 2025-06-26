@@ -1,0 +1,16 @@
+Copyright © 2025 GSylph. All rights reserved.
+
+This software, including all source code, documentation, and related assets, is the proprietary property of [Your Company Name].
+
+You are granted a limited, non-exclusive, non-transferable, revocable license to access and use this software *only through the officially provided platform or service* operated by [Your Company Name].
+
+You may not:
+- Copy, modify, reverse engineer, decompile, disassemble, or create derivative works based on this software.
+- Distribute, sublicense, or make the software available to any third party.
+- Host or deploy this software independently or on behalf of others.
+
+This license does not imply any transfer of ownership, rights, or title to the software.
+
+All use of the software is governed by the Terms of Use and Privacy Policy available on our website. Continued use of the service indicates acceptance of those terms.
+
+For commercial licensing inquiries, contact: --mail--
