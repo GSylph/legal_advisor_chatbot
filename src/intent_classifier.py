@@ -1,21 +1,17 @@
-def classify_intent(user_input):
+def classify_intents(user_input):
     input_lower = user_input.lower()
+    matched_intents = []
 
-    if any(keyword in input_lower for keyword in ["land", "property", "ownership", "encroachment", "plot", "builder", "acquisition", "notice"]):
-        return "property_dispute"
+    intents = {
+        "property_dispute": ["land", "property", "ownership", "encroachment", "plot", "builder", "acquisition", "notice", "possession"],
+        "tenant_rights": ["rent", "tenant", "landlord", "eviction", "lease"],
+        "court_case": ["court", "lawsuit", "legal notice", "hearing", "judge", "sue", "filed a case", "petition", "summons"],
+        "will_and_inheritance": ["will", "inheritance", "succession", "heir", "estate", "ancestral"],
+        "fraud_or_cheating": ["fraud", "cheating", "fake", "scam", "forgery", "duped"]
+    }
 
+    for intent, keywords in intents.items():
+        if any(keyword in input_lower for keyword in keywords):
+            matched_intents.append(intent)
 
-    elif any(keyword in input_lower for keyword in ["rent", "tenant", "landlord", "eviction", "lease"]):
-        return "tenant_rights"
-
-    elif any(keyword in input_lower for keyword in ["court", "lawsuit", "legal notice", "hearing", "judge"]):
-        return "court_case"
-
-    elif any(keyword in input_lower for keyword in ["will", "inheritance", "succession", "heir", "estate"]):
-        return "will_and_inheritance"
-
-    elif any(keyword in input_lower for keyword in ["fraud", "cheating", "fake", "scam", "forgery"]):
-        return "fraud_or_cheating"
-
-    else:
-        return "uncategorized"
+    return matched_intents or ["uncategorized"]

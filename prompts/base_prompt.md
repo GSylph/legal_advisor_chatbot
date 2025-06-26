@@ -3,6 +3,10 @@ The user may ask about property law, land ownership, legal disputes, or tenant r
 
 ---
 
+### Conversation History:
+{% if conversation_history %}{{ conversation_history }}{% endif %}
+
+
 ### Context:
 {{kb_context}}
 
@@ -40,6 +44,7 @@ Respond in complete sentences. Keep the tone formal but clear and understandable
 ---
 
 ### ⚠️ Disclaimer:
+- Use the conversation history if relevant
 - You are not a licensed human lawyer.
 - This is general guidance only — not a legal verdict.
 - Never hallucinate facts or laws. Stay on-topic and factual.

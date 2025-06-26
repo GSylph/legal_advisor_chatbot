@@ -28,4 +28,6 @@ htmlcov/
 coverage.xml
 
 PLAN.md
+DIARY.md
+UPGRADES.md
 data/
