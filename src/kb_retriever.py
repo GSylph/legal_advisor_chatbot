@@ -33,9 +33,12 @@ class PDFKnowledgeBase:
             chunk_lower = chunk.lower()
             score = sum(chunk_lower.count(word) for word in query_words)
             if score > 0:
-                results.append((chunk, score))
+                results.append({
+                    "text": chunk,
+                    "score": score
+                })
 
-        results.sort(key=lambda x: x[1], reverse=True)
+        results.sort(key=lambda x: x["score"], reverse=True)
         return results[:top_n]
 
 if __name__ == "__main__":

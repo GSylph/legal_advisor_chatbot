@@ -3,33 +3,36 @@ The user may ask about property law, land ownership, legal disputes, or tenant r
 
 ---
 
-### Conversation History:
-{% if conversation_history %}{{ conversation_history }}{% endif %}
+{% if conversation_history %}
+## Conversation History:
+{{ conversation_history }}
+
+{% endif %}
 
 
-### Context:
+## Context:
 {{kb_context}}
 
 ---
 
-### 🧾 User Query:
+##  User Query:
 {{ user_input }}
 
 ---
 
-### 🧠 Detected Intent:
+## 🧠 Detected Intent:
 {{ intent }}
 
 ---
 
-### 📌 Relevant Details:
+## 📌 Relevant Details:
 - **Location:** {{ location if location else "Singapore" }}
 - **People Involved:** {{ people if people else "Not specified" }}
 - **Date/Time:** {{ date if date else "Not provided" }}
 
 ---
 
-### 🧑‍⚖️ Response Instructions:
+## 🧑‍⚖️ Response Instructions:
 
 Provide a structured legal response with the following clearly marked sections **using the exact section titles below**:
 
@@ -43,7 +46,7 @@ Respond in complete sentences. Keep the tone formal but clear and understandable
 
 ---
 
-### ⚠️ Disclaimer:
+## ⚠️ Disclaimer:
 - Use the conversation history if relevant
 - You are not a licensed human lawyer.
 - This is general guidance only — not a legal verdict.

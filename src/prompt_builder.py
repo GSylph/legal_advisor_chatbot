@@ -2,20 +2,21 @@ from jinja2 import Template
 from entity_extractor import extract_entities
 from intent_classifier import classify_intents
 
+def format_conversation_history(history):
+    return "\n".join([f"User: {turn['user']}\nBot: {turn['bot']}" for turn in history])
+
 def build_prompt(user_input, kb_chunks,conversation_history=None, intent=None, entities=None,use_history=True,max_history=3):
     with open("prompts/base_prompt.md","r",encoding="utf-8") as file:
         template_str = file.read()
     template=Template(template_str)
 
-    context = "\n\n".join(chunk[0] for chunk in kb_chunks)
+    context = "\n\n".join(chunk["text"] for chunk in kb_chunks)
 
 
     history_text = ""
     if use_history and conversation_history:
         recent_history = conversation_history[-max_history:]
-        for turn in recent_history:
-            history_text += f"User: {turn['user']}\nBot: {turn['bot']}\n"
-
+        history_text = format_conversation_history(recent_history)
     filled_prompt = template.render(
         user_input=user_input,
         conversation_history=history_text.strip(),
