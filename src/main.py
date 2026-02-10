@@ -6,6 +6,11 @@ from prompt_builder import build_prompt
 from response_formatter import format_gemini_response
 from kb_retriever import PDFKnowledgeBase
 from logger import log_fallback_response, log_error
+import sys
+
+# Fix Windows console encoding for emojis
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 def main():
     kb= PDFKnowledgeBase(path="data/statutes")

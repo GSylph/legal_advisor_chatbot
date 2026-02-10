@@ -1,6 +1,8 @@
 python-dotenv
+dotenv
 google-generativeai
 google-genai
+google
 spacy
 Jinja2
 pymupdf

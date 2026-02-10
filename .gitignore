@@ -33,3 +33,4 @@ UPGRADES.md
 data/
 /storage/logs/*
 !storage/logs/.gitkeep
+ROADMAP.md

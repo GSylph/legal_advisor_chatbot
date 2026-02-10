@@ -20,7 +20,7 @@ genai.configure(api_key=API_KEY)
 # Print a success message
 print("Gemini API client initialized successfully.")
 
-model=genai.GenerativeModel("gemini-2.0-flash")
+model=genai.GenerativeModel("gemini-2.5-flash")
 # Check if the model is loaded correctly
 if not model:
     raise RuntimeError("Failed to load the Gemini model.")
