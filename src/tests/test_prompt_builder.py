@@ -1,10 +1,6 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from prompt_builder import build_prompt
-from entity_extractor import extract_entities
-from intent_classifier import classify_intents
+from src.prompt_builder import build_prompt
+from src.entity_extractor import extract_entities
+from src.intent_classifier import classify_intents
 
 user_input = "My uncle is taking over my inherited property in Delhi after my father's death."
 

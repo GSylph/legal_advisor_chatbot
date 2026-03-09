@@ -1,7 +1,4 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from response_formatter import format_gemini_response
+from src.response_formatter import format_gemini_response
 
 raw_response = """
 **1. Summary**
