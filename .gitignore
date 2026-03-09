@@ -34,3 +34,8 @@ data/
 /storage/logs/*
 !storage/logs/.gitkeep
 ROADMAP.md
+
+# Frontend dependencies/build outputs
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
