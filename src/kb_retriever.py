@@ -24,19 +24,44 @@ class PDFKnowledgeBase:
     def chunk_text(self, text):
         #Simple splitting by double newline or paragraphs
         return [chunk.strip() for chunk in text.split('\n\n') if chunk.strip()]
-    
-    
     def search(self, query, top_n=3):
-        query_words=query.lower().split()
-        results=[]
+        """
+        Simple keyword-based search with basic scoring:
+        - Counts occurrences of each query word
+        - Gives a small boost for exact phrase matches
+        - Rewards chunks containing multiple distinct query terms
+        """
+        if not query:
+            return []
+
+        query_lower = query.lower()
+        query_words = [w for w in re.split(r"\W+", query_lower) if w]
+        if not query_words:
+            return []
+
+        results = []
         for chunk in self.chunks:
             chunk_lower = chunk.lower()
-            score = sum(chunk_lower.count(word) for word in query_words)
-            if score > 0:
-                results.append({
+
+            # Base score: total occurrences of individual words
+            word_score = sum(chunk_lower.count(word) for word in query_words)
+            if word_score == 0:
+                continue
+
+            # Distinct word coverage
+            distinct_matches = sum(1 for word in set(query_words) if word in chunk_lower)
+
+            # Exact phrase boost
+            phrase_boost = 2 if query_lower in chunk_lower else 0
+
+            score = word_score + distinct_matches + phrase_boost
+
+            results.append(
+                {
                     "text": chunk,
-                    "score": score
-                })
+                    "score": score,
+                }
+            )
 
         results.sort(key=lambda x: x["score"], reverse=True)
         return results[:top_n]
