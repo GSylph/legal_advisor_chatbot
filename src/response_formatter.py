@@ -1,13 +1,14 @@
+import logging
 import re
 from typing import Dict, List, Optional, Tuple
-import logging
-from logger import log_fallback_response 
+
+from .logger import log_fallback_response
 
 
 logging.basicConfig(
     filename="chatbot.log",
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
 class ResponseFormatter:
@@ -348,6 +349,36 @@ def format_gemini_response(response_text: str) -> str:
         )
 
     return formatter.format_output(parsed_data)
+
+
+def format_and_structure_response(response_text: str) -> Tuple[Dict, str]:
+    """
+    Return both the structured parse result and the formatted text.
+
+    This is intended for use by the HTTP API and other integrations that
+    want JSON as well as human-readable output.
+    """
+    formatter = ResponseFormatter()
+    parsed_data = formatter.parse_response(response_text)
+
+    if (
+        not parsed_data.get("summary")
+        and not parsed_data.get("context")
+        and not parsed_data.get("steps")
+        and not parsed_data.get("warnings")
+        and not parsed_data.get("contacts")
+        and not parsed_data.get("disclaimer")
+    ):
+        logging.warning(f"⚠️ Unstructured Gemini response:\n{response_text.strip()}")
+        log_fallback_response(response_text)
+        fallback_text = (
+            "⚠️ Gemini could not produce a structured response.\n\n"
+            f"📝 Here's the raw output returned:\n\n{response_text.strip()}"
+        )
+        return {}, fallback_text
+
+    formatted = formatter.format_output(parsed_data)
+    return parsed_data, formatted
 
 # Example usage and testing
 if __name__ == "__main__":
