@@ -1,7 +1,8 @@
 from jinja2 import Template
-from entity_extractor import extract_entities
-from intent_classifier import classify_intents
 from pathlib import Path
+
+from .entity_extractor import extract_entities
+from .intent_classifier import classify_intents
 template_path = Path("prompts") / "base_prompt.md"
 
 
