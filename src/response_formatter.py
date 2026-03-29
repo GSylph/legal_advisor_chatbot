@@ -17,9 +17,9 @@ class ResponseFormatter:
         self.section_keywords = {
             'summary': ['summary', 'overview', 'background', 'introduction', 'about'],
             'context': ['context', 'legal framework', 'relevant laws', 'regulations', 'statutes', 'provisions', 'legal basis'],
-            'steps': ['steps', 'step', 'action', 'procedure', 'process', 'do'],
+            'steps': ['steps', 'step', 'steps to take', 'action', 'procedure', 'process', 'do'],
             'warnings': ['warning', 'caution', 'alert', 'beware', 'avoid', 'danger'],
-            'contacts': ['contact', 'authority', 'organization', 'agency', 'bureau', 'office'],
+            'contacts': ['contact', 'contacts', 'relevant contacts', 'authority', 'organization', 'agency', 'bureau', 'office'],
             'disclaimer': ['disclaimer', 'note', 'important', 'legal advice', 'guidance']
         }
     
@@ -73,7 +73,7 @@ class ResponseFormatter:
             # Check if line looks like a header (bold, numbered, etc.)
             if self._is_header_like(line):
                 section_type = self._classify_header(line_clean)
-                if section_type:
+                if section_type and section_type not in headers:
                     headers[section_type] = {
                         'line_number': i,
                         'original_text': line.strip(),
@@ -88,38 +88,72 @@ class ResponseFormatter:
         """
         line_clean = line.strip()
         
-        # Patterns that suggest a header
+        # Patterns that suggest a header.
+        # Supports emoji-prefixed markdown labels like: "📋 **Summary:**"
         header_patterns = [
-            r'^\*\*\d+\.\s*.*\*\*',  # **1. Section Name**
-            r'^\d+\.\s*[A-Z]',       # 1. Section Name
-            r'^\*\*[A-Z].*\*\*',     # **Section Name**
-            r'^[A-Z][A-Z\s]+:',      # SECTION NAME:
-            r'^#{1,6}\s',            # Markdown headers
+            r'^\*\*\d+\.\s*.*\*\*',        # **1. Section Name**
+            r'^\d+\.\s*[A-Z]',                # 1. Section Name
+            r'^\*\*[^\n]+\*\*:?$',          # **Section Name**
+            r'^[A-Z][A-Z\s]+:',                 # SECTION NAME:
+            r'^#{1,6}\s',                       # Markdown headers
+            r'^[^A-Za-z0-9\n]*\*\*[^\n]+\*\*:?$',  # 📋 **Summary:**
         ]
-        
-        return any(re.match(pattern, line_clean) for pattern in header_patterns)
+
+        if any(re.match(pattern, line_clean) for pattern in header_patterns):
+            return True
+
+        # Fallback heuristic: short non-bullet line that contains a known section
+        # keyword and either bold markdown or a trailing colon.
+        if re.match(r'^\s*[*\-•]\s+', line_clean):
+            return False
+
+        classification_text = self._normalize_header_text(line_clean)
+        if len(classification_text.split()) <= 5 and (':' in line_clean or '**' in line_clean):
+            return self._classify_header(classification_text) is not None
+
+        return False
     
     def _classify_header(self, header_text: str) -> Optional[str]:
         """
         Classify header text into section types based on keywords
         """
-        # Remove formatting and get key words
-        clean_header = re.sub(r'[*#\d\.\-:]', '', header_text).strip()
+        # Remove formatting and normalize to plain words.
+        clean_header = self._normalize_header_text(header_text)
         words = clean_header.split()
+        words_set = set(words)
         
         # Score each section type based on keyword matches
         scores = {}
         for section_type, keywords in self.section_keywords.items():
             score = 0
-            for word in words:
-                for keyword in keywords:
-                    if keyword in word or word in keyword:
-                        score += 1
+            for keyword in keywords:
+                keyword_norm = self._normalize_header_text(keyword)
+                if not keyword_norm:
+                    continue
+
+                # Exact or phrase match in full header should dominate.
+                if clean_header == keyword_norm:
+                    score += 4
+                elif keyword_norm in clean_header:
+                    score += 2
+
+                # Token-level exact matches are weaker signals.
+                keyword_tokens = keyword_norm.split()
+                if all(token in words_set for token in keyword_tokens):
+                    score += 1
+
             if score > 0:
                 scores[section_type] = score
         
         # Return the section type with highest score
         return max(scores, key=scores.get) if scores else None
+
+    def _normalize_header_text(self, header_text: str) -> str:
+        """Normalize a potential header line into lowercase plain words."""
+        # Keep alphanumerics and spaces only; this strips emojis and punctuation.
+        normalized = re.sub(r'[^a-z0-9\s]', ' ', header_text.lower())
+        normalized = re.sub(r'\s+', ' ', normalized)
+        return normalized.strip()
     
     def _extract_section_content(self, text: str, header_info: Dict, all_headers: Dict) -> str:
         """
