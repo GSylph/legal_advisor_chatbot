@@ -1,8 +1,10 @@
 python-dotenv
 dotenv
-google-generativeai
 google-genai
+google-generativeai
 google
+chromadb
+sentence-transformers
 spacy
 Jinja2
 pymupdf

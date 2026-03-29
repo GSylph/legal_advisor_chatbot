@@ -32,6 +32,8 @@ DIARY.md
 UPGRADES.md
 data/
 /storage/logs/*
+/storage/vector_store/
+*.sqlite3
 !storage/logs/.gitkeep
 ROADMAP.md
 
@@ -39,3 +41,7 @@ ROADMAP.md
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+
+execution_plan.md
+LOGIC_OVERVIEW.md
+PROJECT_OVERVIEW.md
