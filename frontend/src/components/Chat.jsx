@@ -54,7 +54,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="bg-slate-950 rounded-2xl shadow-2xl flex flex-col h-[75vh] p-4">
+    <div className="bg-gradient-to-b from-zinc-900 to-neutral-950 border border-zinc-800 rounded-2xl shadow-2xl flex flex-col h-[75vh] p-4">
       <div className="flex-1 overflow-y-auto space-y-2 mb-3 pr-1">
         {messages.map((m) => (
           <div
@@ -62,13 +62,12 @@ export default function Chat() {
             className={`flex ${m.sender === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[75%] rounded-xl px-3 py-2 text-sm ${
-                m.sender === "user"
-                  ? "bg-blue-600 text-slate-50"
-                  : "bg-slate-800 text-slate-100"
-              }`}
+              className={`max-w-[75%] rounded-xl px-3 py-2 text-sm ${m.sender === "user"
+                  ? "bg-zinc-700 text-zinc-50"
+                  : "bg-zinc-800 text-zinc-100"
+                }`}
             >
-              <div className="text-[0.7rem] font-semibold text-slate-300 mb-1">
+              <div className="text-[0.7rem] font-semibold text-zinc-300 mb-1">
                 {m.sender === "user" ? "You" : "Legal Advisor"}
               </div>
               <div className="whitespace-pre-wrap">{m.text}</div>
@@ -77,8 +76,8 @@ export default function Chat() {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="max-w-[75%] rounded-xl px-3 py-2 text-sm bg-slate-800 text-slate-100">
-              <div className="text-[0.7rem] font-semibold text-slate-300 mb-1">
+            <div className="max-w-[75%] rounded-xl px-3 py-2 text-sm bg-zinc-800 text-zinc-100">
+              <div className="text-[0.7rem] font-semibold text-zinc-300 mb-1">
                 Legal Advisor
               </div>
               <div>Thinking...</div>
@@ -94,7 +93,7 @@ export default function Chat() {
       )}
 
       <form
-        className="flex gap-2 border-t border-slate-700 pt-2"
+        className="flex gap-2 border-t border-zinc-700 pt-2"
         onSubmit={sendMessage}
       >
         <input
@@ -103,12 +102,12 @@ export default function Chat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={isLoading}
-          className="flex-1 rounded-full border border-slate-600 bg-slate-950 text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 rounded-full border border-zinc-600 bg-zinc-950 text-zinc-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500"
         />
         <button
           type="submit"
           disabled={isLoading}
-          className="rounded-full bg-emerald-400 text-emerald-950 font-semibold px-4 py-2 text-sm disabled:opacity-60"
+          className="rounded-full bg-zinc-300 text-zinc-950 font-semibold px-4 py-2 text-sm hover:bg-zinc-200 disabled:opacity-60"
         >
           {isLoading ? "Sending..." : "Send"}
         </button>
