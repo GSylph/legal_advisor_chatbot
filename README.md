@@ -49,7 +49,7 @@ legal_advisor_chatbot/
 
 ---
 
-## 🧠 How It Works
+## 🧠 How It Works (Updated)
 
 1. **User Enters Prompt** →
 2. **Intent + Entity Detection** →
@@ -57,7 +57,46 @@ legal_advisor_chatbot/
 4. **Prompt Template Filled** (context + history) →
 5. **Sent to Gemini API** →
 6. **Response Parsed into Structure** →
-7. **Result Displayed in CLI**
+7. **Result Displayed in CLI or via React Frontend**
+
+In addition to the CLI, there is now:
+
+- A `ChatService` class (`src/chat_service.py`) that encapsulates the full pipeline.
+- A FastAPI server (`src/api_server.py`) exposing `/api/chat` and `/api/health`.
+- A React + Vite frontend (`frontend/`) that talks to `/api/chat` and renders a chat-style UI.
+
+---
+
+## 🌐 Running the API + React Frontend
+
+### Backend API (FastAPI)
+
+From the project root:
+
+```bash
+source .venv/bin/activate  # if not already
+uvicorn src.api_server:app --reload
+```
+
+Health check:
+
+```bash
+curl http://127.0.0.1:8000/api/health
+```
+
+### Frontend (React + Vite)
+
+In another terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Then open the printed `http://127.0.0.1:5173` URL in your browser.
+
+The Vite dev server proxies `/api/*` requests to `http://127.0.0.1:8000`, so the chat UI will use your local FastAPI backend.
 
 ---
 
@@ -66,6 +105,30 @@ legal_advisor_chatbot/
 * `test_fallback.py`: Tests for edge cases in unstructured output
 * `test_formatter.py`: Verifies structured formatting of Gemini output
 * `test_prompt_builder.py`: Ensures prompt rendering with history and context
+
+RAG-focused tests were added under `src/tests/`:
+
+* `test_kb_retriever.py`: chunking behavior, keyword search metadata, and hybrid fallback
+* `test_kb_cli.py`: KB CLI index/list/reindex command behavior
+* `test_chat_service.py`: pipeline smoke test with mocked model calls
+
+---
+
+## 📚 KB Management CLI
+
+Use the CLI to build, inspect, and rebuild the statutes index.
+
+```bash
+python -m src.kb_cli index --path data/statutes --mode hybrid
+python -m src.kb_cli list --path data/statutes --mode keyword
+python -m src.kb_cli reindex --path data/statutes --mode hybrid
+```
+
+`--mode` options:
+
+* `keyword`: keyword-only retrieval
+* `semantic`: semantic-only retrieval (requires `chromadb` and `sentence-transformers`)
+* `hybrid`: semantic-first with keyword fallback
 
 ---
 
