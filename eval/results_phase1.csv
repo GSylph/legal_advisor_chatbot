@@ -1,0 +1,5 @@
+retriever,n_questions,n_completed,hallucination_rate,citation_accuracy,mean_latency_ms
+none,200,200,0.42,0.58,30672.0
+bm25,200,200,0.22,0.7842,34281.0
+dense,200,200,0.2,0.8,32542.5
+hybrid,200,200,0.36,0.645,33132.4
