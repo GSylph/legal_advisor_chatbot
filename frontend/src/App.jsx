@@ -1,18 +1,17 @@
-import Chat from "./components/Chat.jsx";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import LandingPage from "./pages/LandingPage.jsx";
+import AppShell    from "./AppShell.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-zinc-800 via-neutral-900 to-stone-950 text-zinc-100 px-4 py-8">
-      <header className="text-center mb-6">
-        <h1 className="text-2xl font-semibold text-zinc-100">Legal Advisor Chatbot</h1>
-        <p className="mt-2 text-zinc-400">
-          Ask legal questions and get structured guidance.
-        </p>
-      </header>
-      <main className="w-full max-w-3xl">
-        <Chat />
-      </main>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/"        element={<LandingPage />} />
+        <Route path="/app"     element={<AppShell />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="*"        element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
