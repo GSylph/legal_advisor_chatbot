@@ -1,4 +1,93 @@
+/* Font imports — must precede @tailwind directives */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html, body, #root {
+    height: 100%;
+    background-color: #EBEBEB;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Sidebar transition — CSS transition on width cannot be done with Tailwind alone */
+@layer components {
+  .sidebar {
+    width: 64px;
+    transition: width 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .sidebar.open {
+    width: 220px;
+  }
+  .sidebar-label {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 280ms cubic-bezier(0.4, 0, 0.2, 1), width 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sidebar.open .sidebar-label {
+    opacity: 1;
+    width: auto;
+  }
+
+  /* Scroll-reveal animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1),
+                transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-child {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) calc(var(--i, 0) * 80ms),
+                transform 500ms cubic-bezier(0.4, 0, 0.2, 1) calc(var(--i, 0) * 80ms);
+  }
+  .reveal-child.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* Pipeline step card expand */
+  .pipeline-card {
+    transition: width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 200ms ease;
+  }
+
+  .bot-prose p  { @apply mb-2 leading-relaxed text-[13.5px]; }
+  .bot-prose ul { @apply list-disc list-inside mb-2 pl-1 space-y-0.5; }
+  .bot-prose ol { @apply list-decimal list-inside mb-2 pl-1 space-y-0.5; }
+  .bot-prose li { @apply text-[13.5px]; }
+  .bot-prose strong { @apply font-semibold; }
+  .bot-prose code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    @apply bg-zinc-100 px-1.5 py-0.5 rounded text-[12px];
+  }
+}
+
+/* Scrollbar */
+@layer utilities {
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #D1D1D6; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #A1A1AA; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
