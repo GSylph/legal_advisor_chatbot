@@ -45,3 +45,17 @@ frontend/.vite/
 execution_plan.md
 LOGIC_OVERVIEW.md
 PROJECT_OVERVIEW.md
+
+paper/paper.tex
+eval/.checkpoint_calibration.json
+eval/.checkpoint_phase1.json
+
+frontend/.claude/
+frontend/inspiration/*.webp 
+GEMINI.md
+.gemini/*
+SKILLS.md
+CLAUDE.md
+Implementation_Plan.md
+PROGRESS.md
+Recent Peer-Reviewed Research on Legal AI (2020–2025).md
