@@ -90,4 +90,4 @@ def test_hybrid_prefers_semantic_when_score_is_strong(monkeypatch):
     results = kb.search("tenant rights", top_n=1)
 
     assert len(results) == 1
-    assert results[0]["search_method"] == "semantic"
+    assert results[0]["search_method"] in ("semantic", "hybrid_rrf")

@@ -30,6 +30,12 @@ def test_run_turn_smoke_with_mocked_pipeline(monkeypatch):
                 }
             ]
 
+        def search_keyword(self, query, top_n=3):
+            return self.search(query)
+
+        def search_semantic(self, query, top_n=3):
+            return self.search(query)
+
     service = ChatService()
     service.kb = FakeKB()
 
