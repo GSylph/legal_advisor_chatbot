@@ -1,254 +1,123 @@
-# 📘 Legal Advisor Chatbot (Singapore Law) - README
+# EALAI — Explainable and Auditable Legal AI
 
-An intelligent legal assistant CLI chatbot powered by Google Gemini API that helps users understand Singaporean legal topics. It classifies intent, extracts entities, retrieves statutory context, and provides structured, human-readable legal answers.
+Legal advisory chatbot for Indian citizens combining RAG, symbolic reasoning, and cryptographic audit logging.
 
----
-
-## 🚀 MVP Features
-
-### ✅ Core Capabilities
-
-* **Natural Language Legal Q\&A**
-* **Intent Classification** (e.g., legal question, follow-up, definition)
-* **Entity Extraction** (locations, names, dates)
-* **Prompt Building via Jinja2 Templates**
-* **PDF Knowledge Base Retrieval** (RAG-ready)
-* **Structured Output Formatting** (Summary, Context, Steps, etc.)
-* **Memory Injection for Last N Conversations**
-* **CLI Interface** for local testing
-* **Logging of Fallbacks and Errors**
+**Live Demo:** [link to be added after deployment]
+**Paper:** JURIX 2025 / Legal NLP Workshop submission
 
 ---
 
-## 🗂️ Project Structure
+## What it does
 
-```
-legal_advisor_chatbot/
-├── src/
-│   ├── main.py                # CLI chatbot entrypoint
-│   ├── api_client.py          # Gemini API integration
-│   ├── intent_classifier.py   # Classifies user intent
-│   ├── entity_extractor.py    # Extracts dates, people, locations
-│   ├── prompt_builder.py      # Builds prompt from template + context
-│   ├── response_formatter.py  # Formats Gemini output
-│   ├── kb_retriever.py        # PDF loader + keyword search
-│   ├── logger.py              # Logs fallback and error cases
-│   └── tests/                 # Contains test_fallback.py, test_formatter.py etc.
-├── prompts/
-│   └── base_prompt.md         # Jinja2 prompt template
-├── data/
-│   └── statutes/              # Legal PDFs for KB (optional)
-├── storage/
-│   └── logs/                  # Logs for fallback + errors
-├── .env                       # API keys, config vars
-├── requirements.txt
-├── README.md                  # You're here!
-├── execution_plan.md          # Roadmap, TODOs, notes
-└── API_REFERENCE.md           # Function-by-function developer docs
-```
+EALAI answers legal questions from Indian citizens in plain language by:
+1. Retrieving relevant statutes from the ILDC corpus using dense semantic search
+2. Generating a structured response with an explicit reasoning chain via Llama-3.1-8b
+3. Validating the response against a symbolic rule engine covering Indian contract law and GDPR
+4. Logging every interaction with a SHA-256 cryptographic hash for tamper-evident auditability
 
 ---
 
-## 🧠 How It Works (Updated)
-
-1. **User Enters Prompt** →
-2. **Intent + Entity Detection** →
-3. **PDF Knowledge Base Search** →
-4. **Prompt Template Filled** (context + history) →
-5. **Sent to Gemini API** →
-6. **Response Parsed into Structure** →
-7. **Result Displayed in CLI or via React Frontend**
-
-In addition to the CLI, there is now:
-
-- A `ChatService` class (`src/chat_service.py`) that encapsulates the full pipeline.
-- A FastAPI server (`src/api_server.py`) exposing `/api/chat` and `/api/health`.
-- A React + Vite frontend (`frontend/`) that talks to `/api/chat` and renders a chat-style UI.
-
----
-
-## 🌐 Running the API + React Frontend
-
-### Backend API (FastAPI)
-
-From the project root:
+## Quickstart
 
 ```bash
-source .venv/bin/activate  # if not already
-uvicorn src.api_server:app --reload
+git clone https://github.com/your-username/ealai
+cd ealai
+pip install -r requirements.txt
+cp .env.example .env          # Add your GROQ_API_KEY
+python backend/ingest.py      # Build FAISS index (run once)
+uvicorn backend.main:app --reload
 ```
 
-Health check:
-
-```bash
-curl http://127.0.0.1:8000/api/health
-```
-
-### Frontend (React + Vite)
-
-In another terminal:
-
+Frontend:
 ```bash
 cd frontend
 npm install
-npm run dev
-```
-
-Then open the printed `http://127.0.0.1:5173` URL in your browser.
-
-The Vite dev server proxies `/api/*` requests to `http://127.0.0.1:8000`, so the chat UI will use your local FastAPI backend.
-
----
-
-## 🧪 Testing (MVP Level)
-
-* `test_fallback.py`: Tests for edge cases in unstructured output
-* `test_formatter.py`: Verifies structured formatting of Gemini output
-* `test_prompt_builder.py`: Ensures prompt rendering with history and context
-
-RAG-focused tests were added under `src/tests/`:
-
-* `test_kb_retriever.py`: chunking behavior, keyword search metadata, and hybrid fallback
-* `test_kb_cli.py`: KB CLI index/list/reindex command behavior
-* `test_chat_service.py`: pipeline smoke test with mocked model calls
-
----
-
-## 📚 KB Management CLI
-
-Use the CLI to build, inspect, and rebuild the statutes index.
-
-```bash
-python -m src.kb_cli index --path data/statutes --mode hybrid
-python -m src.kb_cli list --path data/statutes --mode keyword
-python -m src.kb_cli reindex --path data/statutes --mode hybrid
-```
-
-`--mode` options:
-
-* `keyword`: keyword-only retrieval
-* `semantic`: semantic-only retrieval (requires `chromadb` and `sentence-transformers`)
-* `hybrid`: semantic-first with keyword fallback
-
----
-
-## 🧾 Prompt Template (`prompts/base_prompt.md`)
-
-Contains instructions to the Gemini LLM:
-
-* Always structure answer in sections: Summary, Context, Steps, Warnings, Contacts, Disclaimer
-* Inject entities (people, locations, dates)
-* Inject up to 3 turns of chat history
-* Act like a legal assistant for Singapore
-
----
-
-## 📋 Example Interaction
-
-```bash
-$ python src/main.py
-📜 Legal Advisor Chatbot (type 'exit' to quit)
-
-Enter your prompt: My cousin took my father’s property after he died.
-
-🧠 Gemini says:
-📋 Summary: Your issue involves inheritance law...
-📚 Legal Context: According to Section 5 of...
-📝 Steps to Take:
- • Gather documents
- • Contact a civil lawyer
-⚠️ Warnings: Time limits apply for claims.
-📞 Contacts: Legal Aid Bureau
-⚖️ Disclaimer: This is general guidance only...
+npm start
 ```
 
 ---
 
-## ⚒️ Logging System
+## Project Structure
 
-* `fallback_responses.log`: When response was not parseable into structure
-* `errors.log`: Unhandled exceptions or runtime issues
-
----
-
-## 💬 Intent Handling
-
-Currently hardcoded logic for basic intents:
-
-```python
-if intent == "follow_up":
-    handle_follow_up()
-elif intent == "legal_question":
-    format_structured_response()
 ```
-
-✅ Works well for MVP, but post-MVP should adopt intent-handler mapping or schema-driven logic.
-
----
-
-## 📈 Future Work
-
-| Area              | Upgrade                                  |
-| ----------------- | ---------------------------------------- |
-| Intent System     | Replace rules with fine-tuned classifier |
-| Entity Extraction | Legal-BERT or Gemini API NER             |
-| KB Search         | RAG with vector store (FAISS, Chroma)    |
-| Prompting         | Template per intent or schema-driven     |
-| Output            | Support JSON + Markdown responses        |
-| Memory            | Add vector memory / persistent memory    |
-| UI                | Streamlit or Flask frontend              |
-| Deployment        | Dockerize + `docker-compose.yml`         |
-
----
-
-## 🐳 Docker Usage (To be done)
-
-**Dockerfile**:
-
-```Dockerfile
-FROM python:3.10
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["python", "src/main.py"]
-```
-
-**docker-compose.yml**:
-
-```yaml
-version: '3.8'
-services:
-  chatbot:
-    build: .
-    environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-    ports:
-      - "7860:7860"
+ealai/
+├── backend/
+│   ├── main.py          # FastAPI app
+│   ├── retrieval.py     # LlamaIndex + FAISS
+│   ├── llm.py           # Groq API wrapper
+│   ├── rules.py         # experta rule engine
+│   ├── audit.py         # SHA-256 audit logger
+│   ├── validator.py     # Input classifier
+│   ├── benchmark.py     # RAGAS evaluation harness
+│   └── ingest.py        # Corpus ingestion
+├── frontend/src/
+├── corpus/              # ILDC + EUR-Lex texts
+├── data/                # FAISS index, benchmark, audit log
+├── eval/                # Experiment results
+└── docs/                # GEMINI.md, RESEARCH.md, SKILLS.md, etc.
 ```
 
 ---
 
-## 📚 License & Credits
+## Symbolic Rules
 
-This MVP is educational and experimental. Not intended for commercial use. Built using:
+The rule engine covers 20 rules across two domains. See [docs/RULES.md](docs/RULES.md) for the complete specification.
 
-* Python
-* Google Gemini API
-* spaCy (NER)
-* Jinja2 (prompt templating)
-* Rich / argparse (optional future CLI upgrades)
+**Indian Contract / Employment Law (12 rules)**
+- Wrongful termination without notice (Industrial Disputes Act S.25F)
+- Fixed-term contract breach (Indian Contract Act S.73)
+- Landlord entry without notice (Transfer of Property Act S.108)
+- Wage withholding (Payment of Wages Act S.5)
+- Non-compete enforceability (Indian Contract Act S.27)
+- ... and 7 more
+
+**GDPR / EU AI Act (8 rules)**
+- Processing without lawful basis (GDPR Art.6)
+- Right to erasure obligations (GDPR Art.17)
+- High-risk AI conformity assessment (EU AI Act Art.43)
+- ... and 5 more
+
+---
+
+## Evaluation
+
+| Metric | EALAI | Baseline |
+|---|---|---|
+| Faithfulness (RAGAS) | [VALUE] | [VALUE] |
+| Answer Relevancy (RAGAS) | [VALUE] | [VALUE] |
+| Hallucination Rate | [VALUE]% | [VALUE]% |
+| Precision@3 | [VALUE] | — |
+| Recall@3 | [VALUE] | — |
+
+*Fill after running `python backend/benchmark.py`*
 
 ---
 
-## 🏁 Final Words
+## Corpus
 
-🎉 MVP is complete and fully functional via CLI.
-You can:
-
-* Ask legal questions
-* Get answers backed by relevant law
-* Log and debug fallbacks
-* View structured responses
+- **Indian Legal Documents Corpus (ILDC):** Malik et al., ACL-IJCNLP 2021. ~500 filtered Supreme Court judgments.
+- **EUR-Lex:** Official texts of GDPR (Regulation 2016/679) and EU AI Act (Regulation 2024/1689).
 
 ---
+
+## Citation
+
+```bibtex
+@inproceedings{khan2025ealai,
+  title={EALAI: An Explainable and Auditable Legal AI Framework for Indian Legal Advisory},
+  author={Khan, Mohammed Iqbal},
+  booktitle={Proceedings of JURIX 2025},
+  year={2025},
+  publisher={Springer LNCS}
+}
+```
+
+---
+
+## Disclaimer
+
+This system is a research prototype. Outputs are not legal advice. Always consult a qualified legal professional for your specific situation.
+
+## License
+
+MIT
