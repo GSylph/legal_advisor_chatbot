@@ -7,7 +7,7 @@ if sys.platform == 'win32':
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 def main():
-    service = ChatService(kb_path="data/statutes")
+    service = ChatService(kb_path="corpus/raw")
     print("\n📘 Welcome to the Singapore Legal Advisor Chatbot!")
     print("Type your legal question below. Type 'exit' or 'quit' to end the session.\n")
 

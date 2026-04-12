@@ -67,7 +67,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     for name in ("index", "list", "reindex"):
         cmd = subparsers.add_parser(name)
-        cmd.add_argument("--path", default="data/statutes", help="Path containing PDF statutes")
+        cmd.add_argument("--path", default="corpus/raw", help="Path containing PDF statutes")
         cmd.add_argument(
             "--mode",
             default="hybrid",

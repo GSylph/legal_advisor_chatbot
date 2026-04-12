@@ -41,7 +41,7 @@ class PDFKnowledgeBase:
         max_chunk_tokens: int = 800,
         chunk_overlap_ratio: float = 0.15,
     ):
-        self.path = path or "data/statutes"
+        self.path = path or "corpus/raw"
         self.search_mode = search_mode
         self.semantic_score_threshold = semantic_score_threshold
         self.embedding_model_name = embedding_model_name
@@ -49,6 +49,7 @@ class PDFKnowledgeBase:
         self.chunk_overlap_ratio = chunk_overlap_ratio
 
         self.chunks: List[Dict[str, Any]] = []
+        self._bm25 = None
         self._embedder = None
         self._semantic_index_ready = False
         self._vector_store = ChromaVectorStore(
@@ -126,6 +127,7 @@ class PDFKnowledgeBase:
 
     def load_pdf(self):
         self.chunks = []
+        self._bm25 = None
         self._semantic_index_ready = False
 
         if not os.path.isdir(self.path):
@@ -197,30 +199,73 @@ class PDFKnowledgeBase:
         self._vector_store.upsert(ids=ids, embeddings=vectors, documents=texts, metadatas=metadatas)
         self._semantic_index_ready = True
 
-    def search_keyword(self, query: str, top_n: int = 3) -> List[Dict[str, Any]]:
-        query_lower = query.lower()
-        query_words = [w for w in re.split(r"\W+", query_lower) if w]
-        if not query_words:
-            return []
+    # Common English stopwords that pollute keyword scoring in legal texts
+    _STOPWORDS = frozenset(
+        "a an the is was were be been being am are and or but if of in to for on "
+        "with at by from it its this that these those not no nor so as do does did "
+        "has have had may will shall can could would should i me my we our you your "
+        "he she they them their his her who what which when where how all any each "
+        "than too very also about after before between into through during under "
+        "above below up down out off over again further then once here there".split()
+    )
 
+    def _tokenize(self, text: str) -> List[str]:
+        """Tokenize and filter stopwords for BM25 indexing."""
+        return [w for w in re.split(r"\W+", text.lower()) if w and w not in self._STOPWORDS]
+
+    def _build_bm25_index(self) -> None:
+        """Build the BM25 index from loaded chunks (lazy, called on first keyword search)."""
+        if self._bm25 is not None or not self.chunks:
+            return
+        from rank_bm25 import BM25Okapi
+        tokenized_corpus = [self._tokenize(chunk["text"]) for chunk in self.chunks]
+        self._bm25 = BM25Okapi(tokenized_corpus)
+
+    def _search_keyword_fallback(self, query: str, top_n: int = 3) -> List[Dict[str, Any]]:
+        """Simple word-frequency fallback for tiny corpora where BM25 IDF degenerates."""
+        query_tokens = set(self._tokenize(query))
+        if not query_tokens:
+            return []
         results: List[Dict[str, Any]] = []
         for chunk in self.chunks:
             chunk_lower = chunk["text"].lower()
-            word_score = sum(chunk_lower.count(word) for word in query_words)
-            if word_score == 0:
+            score = sum(chunk_lower.count(w) for w in query_tokens)
+            if score > 0:
+                enriched = dict(chunk)
+                enriched["score"] = float(score)
+                enriched["search_method"] = "keyword"
+                results.append(enriched)
+        results.sort(key=lambda x: x["score"], reverse=True)
+        return results[:top_n]
+
+    def search_keyword(self, query: str, top_n: int = 3) -> List[Dict[str, Any]]:
+        if not self.chunks:
+            return []
+
+        self._build_bm25_index()
+        query_tokens = self._tokenize(query)
+        if not query_tokens:
+            return []
+
+        scores = self._bm25.get_scores(query_tokens)
+
+        # Get top-n indices by score
+        ranked_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_n]
+
+        results: List[Dict[str, Any]] = []
+        for idx in ranked_indices:
+            if scores[idx] <= 0:
                 continue
-
-            distinct_matches = sum(1 for word in set(query_words) if word in chunk_lower)
-            phrase_boost = 2 if query_lower in chunk_lower else 0
-            score = float(word_score + distinct_matches + phrase_boost)
-
-            enriched = dict(chunk)
-            enriched["score"] = score
+            enriched = dict(self.chunks[idx])
+            enriched["score"] = float(scores[idx])
             enriched["search_method"] = "keyword"
             results.append(enriched)
 
-        results.sort(key=lambda x: x["score"], reverse=True)
-        return results[:top_n]
+        # BM25 IDF degenerates with very small corpora (< 10 docs) — fall back
+        if not results:
+            return self._search_keyword_fallback(query, top_n)
+
+        return results
 
     def search_semantic(self, query: str, top_n: int = 3) -> List[Dict[str, Any]]:
         if not query or not self.chunks:
@@ -268,24 +313,51 @@ class PDFKnowledgeBase:
                 log_error(f"Semantic search failed ({exc}); falling back to keyword mode")
                 return self.search_keyword(query, top_n=top_n)
 
-        # Hybrid mode
+        # Hybrid mode — Reciprocal Rank Fusion (RRF)
+        keyword_results = self.search_keyword(query, top_n=top_n * 2)
         semantic_results: List[Dict[str, Any]] = []
         try:
-            semantic_results = self.search_semantic(query, top_n=top_n)
+            semantic_results = self.search_semantic(query, top_n=top_n * 2)
         except Exception as exc:
             log_error(f"Hybrid semantic path failed ({exc}); falling back to keyword mode")
+            return keyword_results[:top_n]
 
-        strong_semantic = [
-            item for item in semantic_results if float(item.get("score", 0.0)) >= self.semantic_score_threshold
-        ]
-        if strong_semantic:
-            return strong_semantic[:top_n]
+        return self._rrf_merge(keyword_results, semantic_results, top_n=top_n)
 
-        return self.search_keyword(query, top_n=top_n)
+    @staticmethod
+    def _rrf_merge(
+        keyword_results: List[Dict[str, Any]],
+        semantic_results: List[Dict[str, Any]],
+        top_n: int = 3,
+        k: int = 60,
+    ) -> List[Dict[str, Any]]:
+        """Reciprocal Rank Fusion: score(d) = sum(1 / (k + rank_i))"""
+        scores: Dict[str, float] = {}
+        doc_map: Dict[str, Dict[str, Any]] = {}
+
+        for rank, item in enumerate(keyword_results, start=1):
+            cid = item["chunk_id"]
+            scores[cid] = scores.get(cid, 0.0) + 1.0 / (k + rank)
+            doc_map[cid] = item
+
+        for rank, item in enumerate(semantic_results, start=1):
+            cid = item["chunk_id"]
+            scores[cid] = scores.get(cid, 0.0) + 1.0 / (k + rank)
+            if cid not in doc_map:
+                doc_map[cid] = item
+
+        ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        results: List[Dict[str, Any]] = []
+        for cid, fused_score in ranked[:top_n]:
+            entry = dict(doc_map[cid])
+            entry["score"] = fused_score
+            entry["search_method"] = "hybrid_rrf"
+            results.append(entry)
+        return results
 
 
 if __name__ == "__main__":
-    kb = PDFKnowledgeBase(path="data/statutes")
+    kb = PDFKnowledgeBase(path="corpus/raw")
     kb.load_pdf()
     results = kb.search("tenant rights", top_n=3)
     if not results:
