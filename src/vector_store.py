@@ -35,16 +35,19 @@ class ChromaVectorStore:
         embeddings: List[List[float]],
         documents: List[str],
         metadatas: List[Dict[str, Any]],
+        batch_size: int = 5000,
     ) -> None:
         if not ids:
             return
         collection = self._get_collection()
-        collection.upsert(
-            ids=ids,
-            embeddings=embeddings,
-            documents=documents,
-            metadatas=metadatas,
-        )
+        for start in range(0, len(ids), batch_size):
+            end = start + batch_size
+            collection.upsert(
+                ids=ids[start:end],
+                embeddings=embeddings[start:end],
+                documents=documents[start:end],
+                metadatas=metadatas[start:end],
+            )
 
     def query(self, query_embedding: List[float], top_n: int = 3) -> List[Dict[str, Any]]:
         collection = self._get_collection()
