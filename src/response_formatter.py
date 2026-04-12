@@ -20,7 +20,11 @@ class ResponseFormatter:
             'steps': ['steps', 'step', 'steps to take', 'action', 'procedure', 'process', 'do'],
             'warnings': ['warning', 'caution', 'alert', 'beware', 'avoid', 'danger'],
             'contacts': ['contact', 'contacts', 'relevant contacts', 'authority', 'organization', 'agency', 'bureau', 'office'],
-            'disclaimer': ['disclaimer', 'note', 'important', 'legal advice', 'guidance']
+            'disclaimer': ['disclaimer', 'note', 'important', 'legal advice', 'guidance'],
+            'applicable_law': ['applicable law', 'statute', 'regulation', 'article', 'section'],
+            'reasoning': ['reasoning', 'explanation', 'analysis', 'logic', 'steps of reasoning'],
+            'answer': ['answer', 'plain language advice', 'advice'],
+            'limitations': ['limitations', 'what is not covered', 'scope']
         }
     
     def parse_response(self, response_text: str) -> Dict:
@@ -33,7 +37,11 @@ class ResponseFormatter:
             'steps': [],
             'warnings': [],
             'contacts': [],
-            'disclaimer': ''
+            'disclaimer': '',
+            'applicable_law': '',
+            'reasoning': '',
+            'answer': '',
+            'limitations': ''
         }
         
         # Clean and normalize text
@@ -47,7 +55,37 @@ class ResponseFormatter:
             content = self._extract_section_content(cleaned_text, header_info, section_headers)
             self._process_section_content(section_name, content)
         
+        # Fallback for EALAI specific headers if not caught by dynamic parser
+        if not self.sections['applicable_law']:
+            self.sections['applicable_law'] = self._manual_extract(cleaned_text, "**APPLICABLE LAW:**", ["**REASONING:**", "**ANSWER:**", "**LIMITATIONS:**", "**DISCLAIMER:**"])
+        if not self.sections['reasoning']:
+            self.sections['reasoning'] = self._manual_extract(cleaned_text, "**REASONING:**", ["**ANSWER:**", "**LIMITATIONS:**", "**DISCLAIMER:**"])
+        if not self.sections['answer']:
+            self.sections['answer'] = self._manual_extract(cleaned_text, "**ANSWER:**", ["**LIMITATIONS:**", "**DISCLAIMER:**"])
+        if not self.sections['limitations']:
+            self.sections['limitations'] = self._manual_extract(cleaned_text, "**LIMITATIONS:**", ["**DISCLAIMER:**"])
+
         return self.sections
+
+    def _manual_extract(self, text: str, marker: str, next_markers: List[str]) -> str:
+        """Manual extraction for specific EALAI markers."""
+        if marker not in text:
+            # Try without double asterisks
+            marker_plain = marker.replace("**", "")
+            if marker_plain not in text:
+                return ""
+            marker = marker_plain
+
+        start = text.index(marker) + len(marker)
+        end = len(text)
+        for nm in next_markers:
+            # Check both bold and plain markers
+            for m in [nm, nm.replace("**", "")]:
+                if m in text[start:]:
+                    marker_pos = text.index(m, start)
+                    end = min(end, marker_pos)
+        
+        return text[start:end].strip()
     
     def _normalize_text(self, text: str) -> str:
         """Normalize text for better parsing"""
@@ -176,7 +214,7 @@ class ResponseFormatter:
         """
         Process content based on section type
         """
-        if section_type in ['disclaimer', 'summary', 'context']:
+        if section_type in ['disclaimer', 'summary', 'context', 'applicable_law', 'reasoning', 'answer', 'limitations']:
             self.sections[section_type] = self._clean_text_content(content)
         else:
             items = self._extract_list_items(content)
@@ -291,20 +329,33 @@ class ResponseFormatter:
         """
         Format parsed data into readable output
         """
-        output = "🧠 Gemini says:\n\n"
+        output = "🤖 Gemini Legal Advisor:\n\n"
         
-        # Format summary first
+        # New EALAI Sections
+        if parsed_data.get('applicable_law'):
+            output += "⚖️ **APPLICABLE LAW:**\n"
+            output += f"{parsed_data['applicable_law']}\n\n"
+        
+        if parsed_data.get('reasoning'):
+            output += "🧠 **REASONING:**\n"
+            output += f"{parsed_data['reasoning']}\n\n"
+        
+        if parsed_data.get('answer'):
+            output += "💬 **ANSWER:**\n"
+            output += f"{parsed_data['answer']}\n\n"
+        
+        if parsed_data.get('limitations'):
+            output += "🛑 **LIMITATIONS:**\n"
+            output += f"{parsed_data['limitations']}\n\n"
+
+        # Legacy/Additional Sections
         if parsed_data.get('summary'):
             output += "📋 **Summary:**\n"
             output += f"{parsed_data['summary']}\n\n"
         
-        # Format context section (new addition)
         if parsed_data.get('context'):
             output += "📚 **Legal Context & Framework:**\n"
             output += f"{parsed_data['context']}\n\n"
-        else:
-            output += "📚 **Legal Context & Framework:**\n"
-            output += "No specific legal context or framework information was provided in the response.\n\n"
         
         # Format steps
         if parsed_data.get('steps'):
@@ -314,8 +365,6 @@ class ResponseFormatter:
                 description = step.get('description', '')
                 output += f"• **{title}**: {description}\n"
             output += "\n"
-        else:
-            output += "📝 **Steps to Take:**\n- No specific steps provided.\n\n"
         
         # Format warnings
         if parsed_data.get('warnings'):
@@ -325,8 +374,6 @@ class ResponseFormatter:
                 description = warning.get('description', '')
                 output += f"• **{title}**: {description}\n"
             output += "\n"
-        else:
-            output += "⚠️ **Warnings:**\n- No specific warnings found.\n\n"
         
         # Format contacts
         if parsed_data.get('contacts'):
@@ -342,15 +389,13 @@ class ResponseFormatter:
                     output += f" | Website: {contact_info['website']}"
                 output += "\n"
             output += "\n"
-        else:
-            output += "📞 **Relevant Contacts:**\n- No specific contacts provided.\n\n"
         
         # Format disclaimer
         output += "⚖️ **Disclaimer:**\n"
         if parsed_data.get('disclaimer'):
             output += parsed_data['disclaimer']
         else:
-            output += "This information is for general guidance only and does not constitute professional legal advice."
+            output += "This information is for general guidance only and does not constitute professional legal advice. Consult a qualified Singapore lawyer."
         
         return output
 
@@ -374,6 +419,9 @@ def format_gemini_response(response_text: str) -> str:
     and not parsed_data.get("warnings")
     and not parsed_data.get("contacts")
     and not parsed_data.get("disclaimer")
+    and not parsed_data.get("applicable_law")
+    and not parsed_data.get("reasoning")
+    and not parsed_data.get("answer")
     ):
         logging.warning(f"⚠️ Unstructured Gemini response:\n{response_text.strip()}")
         log_fallback_response(response_text)
@@ -402,6 +450,9 @@ def format_and_structure_response(response_text: str) -> Tuple[Dict, str]:
         and not parsed_data.get("warnings")
         and not parsed_data.get("contacts")
         and not parsed_data.get("disclaimer")
+        and not parsed_data.get("applicable_law")
+        and not parsed_data.get("reasoning")
+        and not parsed_data.get("answer")
     ):
         logging.warning(f"⚠️ Unstructured Gemini response:\n{response_text.strip()}")
         log_fallback_response(response_text)
