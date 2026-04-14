@@ -123,7 +123,7 @@ RUN mkdir -p storage/vector_store storage/logs \
 # Switch to the non-root user for the ingestion step and all runtime commands.
 USER appuser
 
-RUN uv run python -m src.kb_cli ingest corpus/raw/
+RUN uv run python -m src.kb_cli index corpus/raw/
 
 # ── Runtime ───────────────────────────────────────────────────────────────────
 EXPOSE 8000
