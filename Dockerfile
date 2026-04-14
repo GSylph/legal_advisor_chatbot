@@ -29,7 +29,7 @@ RUN pip install --no-cache-dir uv
 # ── Python dependencies ───────────────────────────────────────────────────────
 # Copy lockfile + project manifest first so Docker caches this layer
 # independently from application code changes.
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --no-dev --frozen
 
 # ── spaCy language model ──────────────────────────────────────────────────────
