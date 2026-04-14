@@ -1,3 +1,14 @@
+---
+title: EALAI
+emoji: ⚖️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 8000
+pinned: false
+short_description: Singapore legal AI with audit logging
+---
+
 # EALAI — Explainable and Auditable Legal AI
 
 A research system for Singapore law (PDPA, Employment Act 1968, Contract/Consumer law) combining retrieval-augmented generation, a symbolic rule engine, and cryptographic audit logging. Targeting JURIX 2025.
