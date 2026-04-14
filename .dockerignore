@@ -1,0 +1,46 @@
+# Python virtualenv — never needed inside the container
+.venv/
+venv/
+
+# Frontend build artifacts and dependencies — rebuilt inside the container
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Vector store and logs — built inside the container from corpus/raw/
+storage/vector_store/
+storage/logs/
+
+# Corpus PDFs — downloaded from GitHub during Docker build, not needed in context
+corpus/
+
+# Secrets — injected as env vars at runtime, never baked into the image
+.env
+
+# Research / evaluation artefacts — not needed at runtime
+eval/
+data/
+paper/
+
+# Python cache and test artefacts
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+htmlcov/
+coverage.xml
+
+# Editor and OS noise
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.log
+
+# Git history — not needed inside the image
+.git/
+.gitignore
+
+# Other dev-only files
+.cursor/
+.gemini/
