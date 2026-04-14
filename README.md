@@ -13,7 +13,7 @@ short_description: Singapore legal AI with audit logging
 
 A research system for Singapore law (PDPA, Employment Act 1968, Contract/Consumer law) combining retrieval-augmented generation, a symbolic rule engine, and cryptographic audit logging. Targeting JURIX 2025.
 
-**Live Demo:** [link to be added after deployment]
+**Live Demo:** https://gsylph-ealai.hf.space
 **Paper:** JURIX 2025 · Springer LNCS
 
 ---
