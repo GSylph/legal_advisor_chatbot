@@ -135,3 +135,13 @@ def get_app() -> FastAPI:
     """Helper for ASGI servers."""
     return app
 
+
+# Serve the built React SPA in production.
+# Registered last so it does not shadow any API routes above.
+import os
+from fastapi.staticfiles import StaticFiles
+
+_dist = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
+if os.path.isdir(_dist):
+    app.mount("/", StaticFiles(directory=_dist, html=True), name="spa")
+
