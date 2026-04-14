@@ -123,6 +123,10 @@ RUN mkdir -p storage/vector_store storage/logs \
 # Switch to the non-root user for the ingestion step and all runtime commands.
 USER appuser
 
+# Pre-download the sentence-transformers model so it's baked into the image
+# and never needs to download at runtime (avoids HF Hub rate limits).
+RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
 RUN uv run python -m src.kb_cli index --path corpus/raw/
 
 # ── Runtime ───────────────────────────────────────────────────────────────────
